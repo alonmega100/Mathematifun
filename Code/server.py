@@ -46,7 +46,7 @@ class Server:
             c = client.Client(client_socket, client_address)
             self.add_client(c)
             print("Client added successfully")
-            
+
     def start(self):
         self._server_socket = socket.socket()
         self._server_socket.bind(SERVER_ADDRESS)
