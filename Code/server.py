@@ -2,6 +2,7 @@ import socket
 import threading
 import logging
 import time
+import client
 
 SERVER_ADDRESS = ('0.0.0.0', 4261)
 
@@ -11,33 +12,41 @@ class Server:
         self._client_list = []
         self._client_thread_list = []
         self._server_socket = None
+        self._command_queue = []
 
-    def add_socket(self, client):
-        self._client_list.append(client)
+    def add_client(self, clients):
+        self._client_list.append(clients)
 
-    def remove_socket(self, client):
-        self._client_list.remove(client)
+    def manage_updates(self):
+        while True:
+            if len(self._command_queue) > 0:
+                data = self._command_queue.pop()
+                data = data.decode()
+                key = data[0:2]
+                data = data[2:]
+                if key == "01":
+                    user = data[:3]
+                    data = data[3:]
+                    self._client_list[int(user)].send_message(data)
+
+    def check_for_updates(self):
+        while True:
+            for clients in self._client_list:
+                if clients.get_update():
+                    data = clients.get_messages()
+                    self._command_queue.append(data)
+
+    def remove_socket(self, clients):
+        self._client_list.remove(clients)
 
     def get_clients(self):
-        try:
-            while True:
-                (client_socket, client_address) = self._server_socket.accept()
-                self.add_socket(client_socket)
-                print("Client added successfully")
-                self.get_message()
-        except:
-            print("A problem occurred while trying to get clients")
-
-    def get_message(self):
 
         while True:
-            text = self._server_socket.recv(1024)
-            print("got a message ")
-            print(text)
-
-    def send_message(self, message):
-        pass
-
+            (client_socket, client_address) = self._server_socket.accept()
+            c = client.Client(client_socket, client_address)
+            self.add_client(c)
+            print("Client added successfully")
+            
     def start(self):
         self._server_socket = socket.socket()
         self._server_socket.bind(SERVER_ADDRESS)
@@ -45,11 +54,13 @@ class Server:
         print("Server is on!")
         get_clients_thread = threading.Thread(target=self.get_clients)
         get_clients_thread.start()
-        """
-        get_messages_thread = threading.Thread(target=self.get_message())
-        get_messages_thread.start()
-        """
 
+        check_for_updates_thread\
+            = threading.Thread(target=self.check_for_updates)
+        check_for_updates_thread.start()
+        manage_command_queue_thread\
+            = threading.Thread(target=self.manage_updates)
+        manage_command_queue_thread.start()
 
 
 a = Server()
