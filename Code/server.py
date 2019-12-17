@@ -4,7 +4,7 @@ Hi
 import socket
 import threading
 import client
-
+import time
 SERVER_ADDRESS = ("127.0.0.1", 4261)
 
 
@@ -14,17 +14,31 @@ class Server:
     """
     def __init__(self):
         self._client_list = []
+        self._name_list = []
         self._client_thread_list = []
         self._server_socket = None
         self._command_queue = []
 
-    def add_client(self, clients):
+    def manage_new_client(self, clients):
         """
         Adds the client to the client list
         :param clients: The client
         :return: Nothing
         """
+        clients.start()
+        while not clients.get_update():
+            time.sleep(0.5)
+            print("w8ing")
+
+        name = clients.get_messages()
+        print(name)
+        clients.set_username(name)
+        print(clients.get_username())
+
         self._client_list.append(clients)
+        print("im here")
+        self._name_list.append(clients.get_username())
+        print(self._name_list)
 
     def manage_updates(self):
         """
@@ -35,12 +49,16 @@ class Server:
             if len(self._command_queue) > 0:
                 data = self._command_queue.pop()
                 data = data.decode()
-                print("got the message: " + data)
                 key = data[0:2]
                 data = data[2:]
                 if key == "01":
                     user = data[:3]
                     data = data[3:]
+                    self._client_list[int(user)].send_message(data)
+                elif key == "02":
+                    user = data[:3]
+                    data = str(self._name_list)
+
                     self._client_list[int(user)].send_message(data)
 
     def check_for_updates(self):
@@ -71,9 +89,9 @@ class Server:
         while True:
             (client_socket, client_address) = self._server_socket.accept()
             c = client.Client(client_socket, client_address)
-            self.add_client(c)
-            c.start()
-            print("Client added successfully")
+            manage_new_client = \
+                threading.Thread(target=self.manage_new_client(c))
+            manage_new_client.start()
 
     def start(self):
         """

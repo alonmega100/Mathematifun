@@ -2,6 +2,7 @@
 Manages the receiving messages
 """
 import threading
+import message
 
 
 SERVER_ADDRESS = ("127.0.0.1", 4261)
@@ -16,6 +17,13 @@ class Client(object):
         self._message_list = []
         self._socket = s
         self._address = address
+        self._username = None
+
+    def get_username(self):
+        return self._username
+
+    def set_username(self, username):
+        self._username = username
 
     def get_messages(self):
         """
@@ -45,9 +53,7 @@ class Client(object):
         :return:
         """
         while True:
-            data = self._socket.recv(1024)
-            print("got data from test")
-            print(data.decode())
+            data = self._socket.recv(4)
             self._message_list.append(data)
 
     def start(self):
@@ -58,8 +64,3 @@ class Client(object):
         listen_to_user_thread\
             = threading.Thread(target=self.receive_message)
         listen_to_user_thread.start()
-        """
-        check_for_updates_thread\
-            = threading.Thread(target=self.check_for_updates)
-        check_for_updates_thread.start()
-        """
