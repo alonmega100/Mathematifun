@@ -19,6 +19,12 @@ class Server:
         self._server_socket = None
         self._command_queue = []
 
+    def name_list_to_string(self):
+        final = ""
+        for names in self._name_list:
+            final += str(names) + " "
+        return final
+
     def manage_new_client(self, clients):
         """
         Adds the client to the client list
@@ -28,17 +34,12 @@ class Server:
         clients.start()
         while not clients.get_update():
             time.sleep(0.5)
-            print("w8ing")
-
         name = clients.get_messages()
-        print(name)
         clients.set_username(name)
-        print(clients.get_username())
-
         self._client_list.append(clients)
-        print("im here")
         self._name_list.append(clients.get_username())
-        print(self._name_list)
+        print("name list is: " + str(self._name_list))
+        clients.send_message(self.name_list_to_string())
 
     def manage_updates(self):
         """

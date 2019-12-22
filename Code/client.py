@@ -38,24 +38,59 @@ class Client(object):
         :return: True or False
         """
         return len(self._message_list) > 0
-
+    """
     def send_message(self, text):
-        """
+        
         Simply sends a message to the user
         :param text: The message
         :return: Nothing
-        """
+        
+        self._socket.send(str(len(text)).encode())
         self._socket.send(text.encode())
+    """
+    def send_message(self, msg):
+        length = str(len(msg))
+        length_length = len(length)
+        total_sent = 0
+        print("length length: " + str(length_length))
+        while total_sent < length_length:
+            self._socket.send(length[total_sent:total_sent + 1].encode())
+            total_sent += 1
+            self._socket.send(b'-')
+        total_sent = 0
+        print(msg)
+        while total_sent < int(length):
+            self._socket.send(msg[total_sent:total_sent + 1].encode())
+            total_sent += 1
+            self._socket.send(b'-')
+            self._socket.send(msg.encode())
 
     def receive_message(self):
-        """
+        length = 0
+        total_recv = 0
+        msg = ""
+        data = self._socket.recv(1).decode()
+        while not data == "-":
+            length += int(data)
+            data = self._socket.recv(1).decode()
+        while total_recv < length:
+            data = self._socket.recv(1).decode()
+            msg += data
+            total_recv += 1
+        self._message_list.append(msg)
+        print(msg)
+    """
+    def receive_message(self):
+        
         Receives message permanently runs on a thread
         :return:
-        """
+        
         while True:
-            data = self._socket.recv(4)
+            length = self._socket.recv(1).decode()
+            print("Length is " + str(length))
+            data = self._socket.recv(int(length))
             self._message_list.append(data)
-
+    """
     def start(self):
         """
         Runs all the threads required
