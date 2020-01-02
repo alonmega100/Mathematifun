@@ -18,6 +18,13 @@ class Client(object):
         self._socket = s
         self._address = address
         self._username = None
+        self._user_id = None
+
+    def get_user_id(self):
+        return self._user_id
+
+    def set_user_id(self, user_id):
+        self._user_id = user_id
 
     def get_username(self):
         return self._username
@@ -50,47 +57,34 @@ class Client(object):
     """
     def send_message(self, msg):
         length = str(len(msg))
-        length_length = len(length)
+        length_length = str(len(length))
         total_sent = 0
-        print("length length: " + str(length_length))
-        while total_sent < length_length:
+        while total_sent < int(length_length):
             self._socket.send(length[total_sent:total_sent + 1].encode())
             total_sent += 1
             self._socket.send(b'-')
         total_sent = 0
-        print(msg)
         while total_sent < int(length):
             self._socket.send(msg[total_sent:total_sent + 1].encode())
             total_sent += 1
-            self._socket.send(b'-')
-            self._socket.send(msg.encode())
 
     def receive_message(self):
-        length = 0
-        total_recv = 0
-        msg = ""
-        data = self._socket.recv(1).decode()
-        while not data == "-":
-            length += int(data)
-            data = self._socket.recv(1).decode()
-        while total_recv < length:
-            data = self._socket.recv(1).decode()
-            msg += data
-            total_recv += 1
-        self._message_list.append(msg)
-        print(msg)
-    """
-    def receive_message(self):
-        
-        Receives message permanently runs on a thread
-        :return:
-        
         while True:
-            length = self._socket.recv(1).decode()
-            print("Length is " + str(length))
-            data = self._socket.recv(int(length))
-            self._message_list.append(data)
-    """
+            length = 0
+            total_got = 0
+            msg = ""
+            data = self._socket.recv(1).decode()
+            while not data == "-":
+                length += int(data)
+                data = self._socket.recv(1).decode()
+            while total_got < length:
+                data = self._socket.recv(1).decode()
+                msg += data
+                total_got += 1
+            if not msg[:2] == "00":
+                msg = str(self._user_id) + "#" + msg
+            self._message_list.append(msg)
+
     def start(self):
         """
         Runs all the threads required

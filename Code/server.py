@@ -6,6 +6,7 @@ import threading
 import client
 import time
 SERVER_ADDRESS = ("127.0.0.1", 4261)
+USER_ID = 1
 
 
 class Server:
@@ -18,6 +19,12 @@ class Server:
         self._client_thread_list = []
         self._server_socket = None
         self._command_queue = []
+        self._user_id = 1
+
+    def find_client(self, source):
+        for clients in self._client_list:
+            if str(clients.get_user_id()) == str(source):
+                return clients
 
     def name_list_to_string(self):
         final = ""
@@ -35,10 +42,13 @@ class Server:
         while not clients.get_update():
             time.sleep(0.5)
         name = clients.get_messages()
+        name = name[2:]
         clients.set_username(name)
+        clients.set_user_id(self._user_id)
+        self._user_id += 1
         self._client_list.append(clients)
         self._name_list.append(clients.get_username())
-        print("name list is: " + str(self._name_list))
+        print("Online list: " + str(self._name_list))
         clients.send_message(self.name_list_to_string())
 
     def manage_updates(self):
@@ -49,18 +59,20 @@ class Server:
         while True:
             if len(self._command_queue) > 0:
                 data = self._command_queue.pop()
-                data = data.decode()
-                key = data[0:2]
+                index_of_mark = data.find("#")
+                source = data[:index_of_mark]
+                data = data[index_of_mark+1:]
+                key = data[:2]
                 data = data[2:]
+                print("Key: " + key + "  Source: " + source + "  Data: " + data)
                 if key == "01":
                     user = data[:3]
                     data = data[3:]
                     self._client_list[int(user)].send_message(data)
                 elif key == "02":
-                    user = data[:3]
                     data = str(self._name_list)
-
-                    self._client_list[int(user)].send_message(data)
+                    print("the data im about to send:  " + data)
+                    self.find_client(source).send_message(data)
 
     def check_for_updates(self):
         """
@@ -71,7 +83,8 @@ class Server:
             for clients in self._client_list:
                 if clients.get_update():
                     data = clients.get_messages()
-                    self._command_queue.append(data)
+                    self._command_queue.\
+                        append(data)
 
     def remove_client(self, clients):
         """

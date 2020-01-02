@@ -9,25 +9,20 @@ SERVER_ADDRESS = ("127.0.0.1", 4261)
 
 LIST_OF_MESSAGES = ["hey", "heloo", "wasap", "hi", "heyo"]
 
-import message
-
 
 def send_message(s, msg):
     length = str(len(msg))
-    length_length = len(length)
+    length_length = str(len(length))
+
     total_sent = 0
-    print(length_length)
-    while total_sent < length_length:
+    while total_sent < int(length_length):
         s.send(length[total_sent:total_sent + 1].encode())
         total_sent += 1
     s.send(b'-')
     total_sent = 0
-    print(msg)
     while total_sent < int(length):
         s.send(msg[total_sent:total_sent + 1].encode())
         total_sent += 1
-    s.send(b'-')
-    s.send(msg.encode())
 
 
 def receive_message(s):
@@ -52,18 +47,18 @@ def main():
     time.sleep(1)
 
     name = "Alon"
-    send_message(s1, name)
+    send_message(s1, "00" + name)
 
     msg = receive_message(s1)
-    print(msg)
+    print("Online dudes: " + msg)
 
     c = input()
     while not c == "e":
         if c == "ul":
-            s1.send(("02000" + LIST_OF_MESSAGES[random.randint(0, 4)]).encode())
-            data = s1.recv(1024)
+            send_message(s1, "02")
+            data = receive_message(s1)
             print("got it")
-            print(data.decode())
+            print("the data i got: " + data)
         if c == "r":
             print("reciving")
             data = s1.recv(1024)
