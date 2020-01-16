@@ -49,7 +49,7 @@ class Server:
         self._client_list.append(clients)
         self._name_list.append(clients.get_username())
         print("Online list: " + str(self._name_list))
-        clients.send_message(self.name_list_to_string())
+        clients.send_message(self.name_list_to_string().encode())
 
     def manage_updates(self):
         """
@@ -68,11 +68,11 @@ class Server:
                 if key == "01":
                     user = data[:3]
                     data = data[3:]
-                    self._client_list[int(user)].send_message(data)
+                    self._client_list[int(user)].send_message(data.encode())
                 elif key == "02":
                     data = str(self._name_list)
                     print("the data im about to send:  " + data)
-                    self.find_client(source).send_message(data)
+                    self.find_client(source).send_message(data.encode())
 
     def check_for_updates(self):
         """
