@@ -21,9 +21,14 @@ class Server:
         self._command_queue = []
         self._user_id = 1
 
-    def find_client(self, source):
+    def find_client_id_based(self, source):
         for clients in self._client_list:
             if str(clients.get_user_id()) == str(source):
+                return clients
+
+    def find_client_name_based(self, name):
+        for clients in self._client_list:
+            if str(clients.get_username()) == str(name):
                 return clients
 
     def name_list_to_string(self):
@@ -72,7 +77,14 @@ class Server:
                 elif key == "02":
                     data = str(self._name_list)
                     print("the data im about to send:  " + data)
-                    self.find_client(source).send_message(data.encode())
+                    self.find_client_id_based(source).send_message(data.encode())
+                elif key == "03":
+                    index_of_mark = data.find("#")
+                    user_destination = data[:index_of_mark]
+                    data = data[index_of_mark + 1:]
+                    message = data
+                    self.find_client_name_based(user_destination
+                                     ).send_message(message.encode())
 
     def check_for_updates(self):
         """
