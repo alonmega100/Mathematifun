@@ -1,0 +1,58 @@
+WindowManager:
+    LoginScreen:
+    SignupScreen:
+    MainScreen:
+    SendMessageScreen:
+    WhiteboardScreen:
+
+# TODO: change the order
+<MainScreen>:
+    name: "main"
+    Button:
+        text: "Send Message"
+        on_press:
+            root.manager.transition.direction = "left"
+            app.root.current = "message"
+
+<LoginScreen>:
+    username_text_input: username_text_input
+    login_button: login_button
+    name: "login"
+
+    GridLayout:
+        size: self.size
+        pos: self.pos
+        row: 2
+        cols: 2
+        TextInput:
+            id: username
+            text: "Enter your username here"
+        Button:
+            id: login_button
+            text: "Login"
+            on_press:
+                root.manager.transition.direction = "left"
+                app.root.current = "main"
+        Button:
+            text: "Send Message"
+
+<SignupScreen>:
+    name: "singup"
+    GridLayout:
+        size: self.size
+        pos: self.pos
+        row: 1
+        cols: 1
+        Button:
+            text: "Signup"
+
+<SendMessageScreen>:
+    name: "message"
+    Button:
+        text: "Main Menu"
+        on_press:
+            root.manager.transition.direction = "right"
+            app.root.current = "main"
+
+<WhiteBoardScreen>:
+    name: "whiteboard"
