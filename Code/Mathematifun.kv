@@ -8,14 +8,31 @@ WindowManager:
 # TODO: change the order
 <MainScreen>:
     name: "main"
-    Button:
-        text: "Send Message"
-        on_press:
-            root.manager.transition.direction = "left"
-            app.root.current = "message"
+    GridLayout:
+        size: self.size
+        pos: self.pos
+        row: 2
+        cols: 2
+        Label:
+            size: self.texture_size
+            text: "Main Screen"
+        Button:
+            id: message_button
+            text: "Send Message"
+            on_press:
+                root.manager.transition.direction = "left"
+                app.root.current = "message"
+        Button:
+            id: white_board_button
+            text: "White Board"
+            on_press:
+                root.manager.transition.direction = "left"
+                app.root.current = "whiteboard"
+
+
 
 <LoginScreen>:
-    username_text_input: username_text_input
+    # TODO username_text_input: username_text_input
     login_button: login_button
     name: "login"
 
@@ -24,6 +41,9 @@ WindowManager:
         pos: self.pos
         row: 2
         cols: 2
+        Label:
+            size: self.texture_size
+            text: "Login Screen"
         TextInput:
             id: username
             text: "Enter your username here"
@@ -34,25 +54,54 @@ WindowManager:
                 root.manager.transition.direction = "left"
                 app.root.current = "main"
         Button:
-            text: "Send Message"
+            id: signup_button
+            text: "Sing Up"
+            on_press:
+                root.manager.transition.direction = "left"
+                app.root.current = "signup"
 
 <SignupScreen>:
-    name: "singup"
+    name: "signup"
     GridLayout:
         size: self.size
         pos: self.pos
-        row: 1
+        row: 2
         cols: 1
         Button:
-            text: "Signup"
+            id: signup_button
+            text: "Sing Up"
+            on_press:
+                root.manager.transition.direction = "left"
+                app.root.current = "main"
 
 <SendMessageScreen>:
     name: "message"
-    Button:
-        text: "Main Menu"
-        on_press:
-            root.manager.transition.direction = "right"
-            app.root.current = "main"
+    GridLayout:
+        size: self.size
+        pos: self.pos
+        row: 2
+        cols: 2
+        Label:
+            size: self.texture_size
+            text: "Send Message"
+        TextInput:
+            text: "Type the message you want to send"
+        Button:
+            text: "Main Menu"
+            on_press:
+                root.manager.transition.direction = "right"
+                app.root.current = "main"
+
 
 <WhiteBoardScreen>:
+
     name: "whiteboard"
+
+    GridLayout:
+        size: self.size
+        pos: self.pos
+        row: 2
+        cols: 1
+        Label:
+            size: self.texture_size
+            text: "WhiteBoard"

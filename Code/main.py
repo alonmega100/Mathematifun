@@ -12,6 +12,13 @@ from kivy.properties import ObjectProperty
 import socket
 import ui
 
+import whiteboard_screen
+import send_message_screen
+import main_screen
+import signup_screen
+import login_screen
+# TODO ^^^^^^^^^^
+
 
 class MathematifunApp(App):
     """
