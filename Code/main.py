@@ -15,7 +15,7 @@ import ui
 
 class MathematifunApp(App):
     """
-    the big app
+    The big app
     """
     connetion = ObjectProperty(socket.socket)
 
