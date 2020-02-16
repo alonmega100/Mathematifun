@@ -8,6 +8,15 @@ from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty
 from kivy.app import App
 
+from Code.main import MathematifunApp
+import socket
+import threading
+import logging
+import time
+import random
+
+SERVER_ADDRESS = ("127.0.0.1", 4261)
+
 
 class LoginScreen(Screen):
     """
@@ -16,11 +25,17 @@ class LoginScreen(Screen):
     login_button = ObjectProperty(None)
     username_text_input = ObjectProperty(None)
 
-    def on_login_button_press(self, _):
+    def on_login_button_press(self, str):
         """
         Login to server
         :param _:
         :return:
         """
         app = App.get_running_app()
-        # app.connection.connect()
+        app.connection = socket.socket()
+        app.connection.connect(SERVER_ADDRESS)
+        app.listen_to_user_thread = threading.Thread(
+            target=MathematifunApp.receive_message, args=(app,))
+        app.listen_to_user_thread.start()
+        name = self.username_text_input.text
+        app.send_message(b"00" + name.encode())

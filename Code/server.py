@@ -43,6 +43,7 @@ class Server:
         :param clients: The client
         :return: Nothing
         """
+        print("heree")
         clients.start()
         while not clients.get_update():
             time.sleep(0.5)
@@ -114,9 +115,10 @@ class Server:
         """
         while True:
             (client_socket, client_address) = self._server_socket.accept()
-            c = client.Client(client_socket, client_address)
+            c = (client.Client(client_socket, client_address),)
+
             manage_new_client = \
-                threading.Thread(target=self.manage_new_client(c))
+                threading.Thread(target=self.manage_new_client, args=c)
             manage_new_client.start()
 
     def start(self):

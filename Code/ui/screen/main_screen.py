@@ -12,5 +12,4 @@ class MainScreen(Screen):
     """
     The main screen
     """
-
     pass

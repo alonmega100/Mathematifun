@@ -22,17 +22,21 @@ WindowManager:
             on_press:
                 root.manager.transition.direction = "left"
                 app.root.current = "message"
+
         Button:
             id: white_board_button
             text: "White Board"
             on_press:
                 root.manager.transition.direction = "left"
                 app.root.current = "whiteboard"
+        Label:
+            size: self.texture_size
+            text: "Messages you got:"
 
 
 
 <LoginScreen>:
-    # TODO username_text_input: username_text_input
+    username_text_input: username_text_input
     login_button: login_button
     name: "login"
 
@@ -45,12 +49,13 @@ WindowManager:
             size: self.texture_size
             text: "Login Screen"
         TextInput:
-            id: username
-            text: "Enter your username here"
+            id: username_text_input
+            text: "Enter your name here"
         Button:
             id: login_button
-            text: "Login"
+            text: "Connect"
             on_press:
+                root.on_login_button_press(None)
                 root.manager.transition.direction = "left"
                 app.root.current = "main"
         Button:
@@ -105,3 +110,8 @@ WindowManager:
         Label:
             size: self.texture_size
             text: "WhiteBoard"
+        Button:
+            text: "Main Menu"
+            on_press:
+                root.manager.transition.direction = "right"
+                app.root.current = "main"

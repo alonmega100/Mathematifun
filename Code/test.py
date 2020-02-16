@@ -56,7 +56,7 @@ def main():
     s1 = socket.socket()
     s1.connect(SERVER_ADDRESS)
     print("conected")
-    time.sleep(1)
+
     name = LIST_OF_NAMES[random.randint(1, len(LIST_OF_NAMES)-1)]
     send_message(s1, b"00" + name.encode())
     listen_to_user_thread \
@@ -70,7 +70,7 @@ def main():
         = threading.Thread(target=print_information)
     print_information_thread.start()
     """
-    print("Online dudes: ")
+    print("Your name is: "+ name)
     print("Enter command: ")
     c = input()
     while not c == "e":
@@ -85,6 +85,7 @@ def main():
             send_message(s1, message)
         print("Enter command: ")
         c = input()
+
 
     input()
     s1.close()
