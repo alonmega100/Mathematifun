@@ -5,6 +5,8 @@ import socket
 import threading
 import client
 import time
+import sqlite3
+
 SERVER_ADDRESS = ("127.0.0.1", 4261)
 USER_ID = 1
 
@@ -20,6 +22,8 @@ class Server:
         self._server_socket = None
         self._command_queue = []
         self._user_id = 1
+        self._conn = None
+        self.cursor = None
 
     def find_client_id_based(self, source):
         for clients in self._client_list:
@@ -138,6 +142,14 @@ class Server:
         manage_command_queue_thread \
             = threading.Thread(target=self.manage_updates)
         manage_command_queue_thread.start()
+        self._conn = sqlite3.connect("../Data/users_database.db")
+        self._cursor = self._conn.cursor()
+        self._cursor.execute("""CREATE TABLE IF NOT EXISTS user (
+    username text PRIMARY KEY,
+    password text NOT NULL,
+    name text NOT NULL
+);
+""")
 
 
 a = Server()

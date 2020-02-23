@@ -48,9 +48,17 @@ WindowManager:
         Label:
             size: self.texture_size
             text: "Login Screen"
-        TextInput:
-            id: username_text_input
-            text: "Enter your name here"
+        GridLayout:
+            size: self.size
+            pos: self.pos
+            row: 2
+            cols: 1
+            TextInput:
+                id: username_text_input
+                text: "Enter your username here"
+            TextInput:
+                id: password_text_input
+                text: "Enter your password here"
         Button:
             id: login_button
             text: "Connect"
@@ -96,6 +104,9 @@ WindowManager:
             on_press:
                 root.manager.transition.direction = "right"
                 app.root.current = "main"
+        Label:
+            size: self.texture_size
+            text: "Send Message"
 
 
 <WhiteBoardScreen>:
