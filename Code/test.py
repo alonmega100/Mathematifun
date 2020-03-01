@@ -86,7 +86,6 @@ def main():
         print("Enter command: ")
         c = input()
 
-
     input()
     s1.close()
 

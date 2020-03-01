@@ -53,8 +53,6 @@ class MathematifunApp(App):
                 total_got += 1
             print(msg)
 
-
-
     def build(self):
         return Builder.load_file("Mathematifun.kv")
 

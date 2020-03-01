@@ -5,7 +5,7 @@ import socket
 import threading
 import client
 import time
-import sqlite3
+import users_database
 
 SERVER_ADDRESS = ("127.0.0.1", 4261)
 USER_ID = 1
@@ -22,8 +22,7 @@ class Server:
         self._server_socket = None
         self._command_queue = []
         self._user_id = 1
-        self._conn = None
-        self.cursor = None
+        self.database = None
 
     def find_client_id_based(self, source):
         for clients in self._client_list:
@@ -50,7 +49,7 @@ class Server:
         print("heree")
         clients.start()
         while not clients.get_update():
-            time.sleep(0.5)
+            pass
         name = clients.get_messages()
         name = name[2:]
         clients.set_username(name)
@@ -90,6 +89,17 @@ class Server:
                     message = data
                     self.find_client_name_based(user_destination
                                      ).send_message(message.encode())
+                elif key == "04":
+                    index_of_mark = data.find("#")
+                    username = data[:index_of_mark]
+                    data = data[index_of_mark + 1:]
+                    index_of_mark = data.find("#")
+                    password = data[:index_of_mark]
+                    is_exists = self.database.user_exists(username)
+                    if is_exists():
+                        real_password = self.database.get_password(username)
+                        if real_password == password:
+                            self.
 
     def check_for_updates(self):
         """
@@ -142,14 +152,10 @@ class Server:
         manage_command_queue_thread \
             = threading.Thread(target=self.manage_updates)
         manage_command_queue_thread.start()
-        self._conn = sqlite3.connect("../Data/users_database.db")
-        self._cursor = self._conn.cursor()
-        self._cursor.execute("""CREATE TABLE IF NOT EXISTS user (
-    username text PRIMARY KEY,
-    password text NOT NULL,
-    name text NOT NULL
-);
-""")
+        users_database.UsersDatabase.create_database("test.db")
+        self.database = users_database.UsersDatabase("test.db")
+        #d.add_user("Titfuck69", "BongoBongo")
+        print(self.database.get_user("Titfuck69", "BongoBongo"))
 
 
 a = Server()

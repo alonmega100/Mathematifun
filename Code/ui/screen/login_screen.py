@@ -24,6 +24,7 @@ class LoginScreen(Screen):
     """
     login_button = ObjectProperty(None)
     username_text_input = ObjectProperty(None)
+    password_text_input = ObjectProperty(None)
 
     def on_login_button_press(self, str):
         """
@@ -37,5 +38,5 @@ class LoginScreen(Screen):
         app.listen_to_user_thread = threading.Thread(
             target=MathematifunApp.receive_message, args=(app,))
         app.listen_to_user_thread.start()
-        name = self.username_text_input.text
-        app.send_message(b"00" + name.encode())
+        username = self.username_text_input.text
+        password = self.password_text_input.text
