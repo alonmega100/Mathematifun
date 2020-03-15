@@ -25,15 +25,31 @@ import send_message_screen
 import main_screen
 import signup_screen
 import login_screen
-# TODO ^^^^^^^^^^
+# TODO ^^^^^^^^^^^^^
 
 
 class MathematifunApp(App):
     """
     The big app
     """
-    connection = ObjectProperty(None)
     listen_to_user_thread = ObjectProperty(None)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._connection_lock = threading.Lock()
+        self.connection = None
+        self.messages = []
+        self.messages_lock = threading.Lock()
+
+    @property
+    def connection(self):
+        with self._connection_lock:
+            return self._connection
+
+    @connection.setter
+    def connection(self, value):
+        with self._connection_lock:
+            self._connection = value
 
     def send_message(self, msg):
         self.connection.sendall(str(len(msg)).encode() + b"-" + msg)
@@ -52,6 +68,8 @@ class MathematifunApp(App):
                 msg += data
                 total_got += 1
             print(msg)
+            with self.messages_lock:
+                self.messages.append(msg)
 
     def build(self):
         return Builder.load_file("Mathematifun.kv")

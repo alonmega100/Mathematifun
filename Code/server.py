@@ -22,7 +22,6 @@ class Server:
         self._server_socket = None
         self._command_queue = []
         self._user_id = 1
-        self.database = None
 
     def find_client_id_based(self, source):
         for clients in self._client_list:
@@ -46,29 +45,31 @@ class Server:
         :param clients: The client
         :return: Nothing
         """
-        print("heree")
+        print("added new client")
         clients.start()
         while not clients.get_update():
             pass
-        name = clients.get_messages()
-        name = name[2:]
-        clients.set_username(name)
+        #name = clients.get_messages()
+        #name = name[2:]
+        #clients.set_username(name)
         clients.set_user_id(self._user_id)
         self._user_id += 1
         self._client_list.append(clients)
-        self._name_list.append(clients.get_username())
-        print("Online list: " + str(self._name_list))
-        clients.send_message(self.name_list_to_string().encode())
+        #self._name_list.append(clients.get_username())
+       # print("Online list: " + str(self._name_list))
+        #clients.send_message(self.name_list_to_string().encode())
 
     def manage_updates(self):
         """
         Manages the messages the server gets from the clients
         :return:
         """
+        #TODO: SOURCE CAN BE FOUND IN THE FIRST PLACE OF THE TUPLE
+        database = users_database.UsersDatabase("../Data/users_database.db")
         while True:
             if len(self._command_queue) > 0:
-                data = self._command_queue.pop()
-                index_of_mark = data.find("#")
+                client, data = self._command_queue.pop()
+                index_of_mark = data.index("#")
                 source = data[:index_of_mark]
                 data = data[index_of_mark+1:]
                 key = data[:2]
@@ -83,23 +84,30 @@ class Server:
                     print("the data im about to send:  " + data)
                     self.find_client_id_based(source).send_message(data.encode())
                 elif key == "03":
-                    index_of_mark = data.find("#")
+                    index_of_mark = data.index("#")
                     user_destination = data[:index_of_mark]
                     data = data[index_of_mark + 1:]
                     message = data
                     self.find_client_name_based(user_destination
                                      ).send_message(message.encode())
                 elif key == "04":
-                    index_of_mark = data.find("#")
+                    index_of_mark = data.index("#")
                     username = data[:index_of_mark]
+                    print("this is ur username:  " + username)
                     data = data[index_of_mark + 1:]
-                    index_of_mark = data.find("#")
+                    index_of_mark = data.index("#")
                     password = data[:index_of_mark]
-                    is_exists = self.database.user_exists(username)
-                    if is_exists():
-                        real_password = self.database.get_password(username)
+                    print("this is ur password:  " + password)
+                    is_exists = database.user_exists(username)
+                    print("is exists: " + str(is_exists))
+                    if is_exists:
+                        real_password = database.get_password(username)
                         if real_password == password:
-                            self.
+                            client.send_message("Logged in")
+                        else:
+                            client.send_message("Password is wrong")
+                    else:
+                        client.send_message("User doesn't exist")
 
     def check_for_updates(self):
         """
@@ -107,11 +115,12 @@ class Server:
         :return: Nothing
         """
         while True:
-            for clients in self._client_list:
-                if clients.get_update():
-                    data = clients.get_messages()
+            for client in self._client_list:
+                if client.get_update():
+                    data = client.get_messages()
+                    command = (client, data)
                     self._command_queue.\
-                        append(data)
+                        append(command)
 
     def remove_client(self, clients):
         """
@@ -152,10 +161,12 @@ class Server:
         manage_command_queue_thread \
             = threading.Thread(target=self.manage_updates)
         manage_command_queue_thread.start()
-        users_database.UsersDatabase.create_database("test.db")
-        self.database = users_database.UsersDatabase("test.db")
-        #d.add_user("Titfuck69", "BongoBongo")
-        print(self.database.get_user("Titfuck69", "BongoBongo"))
+        users_database.UsersDatabase.create_database("../Data/users_database.db")
+        database = users_database.UsersDatabase("../Data/users_database.db")
+        #database.add_user("a", "b")
+        print(database.get_user("a", "b"))
+        database.close()
+
 
 
 a = Server()

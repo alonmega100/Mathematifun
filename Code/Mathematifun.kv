@@ -57,17 +57,17 @@ WindowManager:
             cols: 1
             TextInput:
                 id: username_text_input
-                text: "Enter your username here"
+                text: "a"#"Enter your username here"
+                #TODO: CHANGE THE TEXT
             TextInput:
                 id: password_text_input
-                text: "Enter your password here"
+                text: "b"#"Enter your password here"
         Button:
             id: login_button
             text: "Connect"
             on_press:
-                root.on_login_button_press(None)
-                root.manager.transition.direction = "left"
-                app.root.current = "main"
+                root.on_login_button_press()
+
         Button:
             id: signup_button
             text: "Sing Up"

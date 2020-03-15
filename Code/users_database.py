@@ -126,7 +126,7 @@ class UsersDatabase(object):
         """
         self._cursor.execute("SELECT username FROM users\n"
                              "WHERE username = ?", (username,))
-        return self._cursor.fetchone() is None
+        return self._cursor.fetchone() is not None
 
     def close(self):
         """

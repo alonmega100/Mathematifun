@@ -47,7 +47,7 @@ class Client(object):
         return len(self._message_list) > 0
 
     def send_message(self, msg):
-        self._socket.sendall(str(len(msg)).encode() + b"-" + msg)
+        self._socket.sendall(str(len(msg)).encode() + b"-" + msg.encode())
 
     def receive_message(self):
         while True:
