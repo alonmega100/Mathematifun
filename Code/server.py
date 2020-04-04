@@ -28,7 +28,7 @@ class Server:
             if str(clients.get_user_id()) == str(source):
                 return clients
 
-    def find_client_name_based(self, name):
+    def find_client_username_based(self, name):
         for clients in self._client_list:
             if str(clients.get_username()) == str(name):
                 return clients
@@ -82,13 +82,14 @@ class Server:
                 elif key == "02":
                     data = str(self._name_list)
                     print("the data im about to send:  " + data)
-                    self.find_client_id_based(source).send_message(data.encode())
+                    self.find_client_id_based(source)\
+                        .send_message(data.encode())
                 elif key == "03":
                     index_of_mark = data.index("#")
                     user_destination = data[:index_of_mark]
                     data = data[index_of_mark + 1:]
                     message = data
-                    self.find_client_name_based(user_destination
+                    self.find_client_username_based(user_destination
                                      ).send_message(message.encode())
                 elif key == "04":
                     index_of_mark = data.index("#")
@@ -98,16 +99,17 @@ class Server:
                     index_of_mark = data.index("#")
                     password = data[:index_of_mark]
                     print("this is ur password:  " + password)
-                    is_exists = database.user_exists(username)
-                    print("is exists: " + str(is_exists))
-                    if is_exists:
-                        real_password = database.get_password(username)
-                        if real_password == password:
-                            client.send_message("Logged in")
-                        else:
-                            client.send_message("Password is wrong")
+                    user_exists = database.get_user(username, password)
+                    print("is exists: " + str(user_exists))
+                    if user_exists:
+                        #real_password = database.get_password(username)
+                        #if real_password == password:
+                        client.send_message(b"Logged in")
+                        client.set_username(username)
                     else:
-                        client.send_message("User doesn't exist")
+                        client.send_message\
+                            (b"Username or password are incorrect")
+                        client.close_connection()
 
     def check_for_updates(self):
         """
@@ -163,10 +165,9 @@ class Server:
         manage_command_queue_thread.start()
         users_database.UsersDatabase.create_database("../Data/users_database.db")
         database = users_database.UsersDatabase("../Data/users_database.db")
-        #database.add_user("a", "b")
+        #database.add_user("b", "c")
         print(database.get_user("a", "b"))
         database.close()
-
 
 
 a = Server()

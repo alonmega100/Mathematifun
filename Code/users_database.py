@@ -73,9 +73,7 @@ class UsersDatabase(object):
             "WHERE username = ? and password = ?",
             (username, password))
         result = self._cursor.fetchone()
-        if result is None:
-            raise ValueError("No such user")
-        return result[0], result[1]
+        return result is not None
 
     def get_password(self, username):
         """

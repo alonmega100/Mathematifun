@@ -6,9 +6,8 @@ __author__ = "Alon"
 
 
 from kivy.app import App
-from kivy.lang import Builder
 from kivy.properties import ObjectProperty
-
+from kivy.clock import Clock
 
 import socket
 import threading
@@ -20,12 +19,10 @@ import random
 import socket
 import ui
 
-import whiteboard_screen
-import send_message_screen
-import main_screen
-import signup_screen
-import login_screen
+
 # TODO ^^^^^^^^^^^^^
+
+SERVER_ADDRESS = ("127.0.0.1", 4261)
 
 
 class MathematifunApp(App):
@@ -38,8 +35,17 @@ class MathematifunApp(App):
         super().__init__(**kwargs)
         self._connection_lock = threading.Lock()
         self.connection = None
+        self._login_status_lock = threading.Lock()
+        self._login_status = "Not logged in"
+
         self.messages = []
+
         self.messages_lock = threading.Lock()
+
+    @property
+    def login_status(self):
+        with self._login_status_lock:
+            return self._login_status
 
     @property
     def connection(self):
@@ -50,6 +56,41 @@ class MathematifunApp(App):
     def connection(self, value):
         with self._connection_lock:
             self._connection = value
+    """
+
+    @property
+    def messages_connection(self):
+        with self._messages_connection_lock:
+            return self._messages_connection
+
+    @messages_connection.setter
+    def messages_connection(self, value):
+        with self._messages_connection_lock:
+            self._messages_connection = value
+    """
+    def login(self, username, password, callback):
+        self.connection = socket.socket()
+        self.connection.connect(SERVER_ADDRESS)
+        self.listen_to_user_thread = threading.Thread(
+            target=self.receive_message)
+
+        self.listen_to_user_thread.start()
+        print("sending info")
+        #TODO: #(str(len(msg)).encode() + b"-" + msg)
+        msg = f"04{username}#{password}#".encode()
+        self.send_message(msg)
+
+        #TODO: manage the messages correctly (add index to messages)
+        while True:
+            with self.messages_lock:
+                if len(self.messages) > 0:
+                    with self._login_status_lock:
+                        self._login_status = self.messages.pop()
+                        break
+                    #TODO: manage all cases (wrong password etc..)
+
+        Clock.schedule_once(callback)
+        #TODO: put None in logging thread if it crashes or Logged out
 
     def send_message(self, msg):
         self.connection.sendall(str(len(msg)).encode() + b"-" + msg)
@@ -72,7 +113,7 @@ class MathematifunApp(App):
                 self.messages.append(msg)
 
     def build(self):
-        return Builder.load_file("Mathematifun.kv")
+        return
 
 
 def main():

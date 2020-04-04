@@ -39,6 +39,9 @@ class Client(object):
         """
         return self._message_list.pop()
 
+    def close_connection(self):
+        self._socket.close()
+
     def get_update(self):
         """
         A check whether there is an update or no (message wise)
@@ -47,7 +50,7 @@ class Client(object):
         return len(self._message_list) > 0
 
     def send_message(self, msg):
-        self._socket.sendall(str(len(msg)).encode() + b"-" + msg.encode())
+        self._socket.sendall(str(len(msg)).encode() + b"-" + msg)
 
     def receive_message(self):
         while True:

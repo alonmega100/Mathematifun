@@ -66,7 +66,7 @@ WindowManager:
             id: login_button
             text: "Connect"
             on_press:
-                root.on_login_button_press()
+                root.login()
 
         Button:
             id: signup_button
@@ -82,6 +82,8 @@ WindowManager:
         pos: self.pos
         row: 2
         cols: 1
+        CheckBox:
+            id: is_teacher_checkbox
         Button:
             id: signup_button
             text: "Sing Up"
@@ -91,34 +93,46 @@ WindowManager:
 
 <SendMessageScreen>:
     name: "message"
+    destination_user_textbox: destination_user_textbox
+    message_textbox: message_textbox
+
     GridLayout:
         size: self.size
         pos: self.pos
-        row: 2
+        row: 3
         cols: 2
+        Label:
+            size: self.texture_size
+            text: "Destination"
+        TextInput:
+            id: destination_user_textbox
+            text: "Type the destination's username"
         Label:
             size: self.texture_size
             text: "Send Message"
         TextInput:
+            id: message_textbox
             text: "Type the message you want to send"
         Button:
             text: "Main Menu"
             on_press:
                 root.manager.transition.direction = "right"
                 app.root.current = "main"
-        Label:
+        Button:
             size: self.texture_size
             text: "Send Message"
+            on_press:
+                root.send_message()
 
 
-<WhiteBoardScreen>:
-
+<WhiteboardScreen>:
+    whiteboard: whiteboard
     name: "whiteboard"
 
     GridLayout:
         size: self.size
         pos: self.pos
-        row: 2
+        row: 3
         cols: 1
         Label:
             size: self.texture_size
@@ -128,3 +142,45 @@ WindowManager:
             on_press:
                 root.manager.transition.direction = "right"
                 app.root.current = "main"
+        Whiteboard:
+            id: whiteboard
+
+<Whiteboard>:
+
+    settings: settings
+    board: board
+
+    GridLayout:
+        size: root.size
+        pos: root.pos
+        cols: 1
+        rows: 2
+
+        BoardSettings:
+            id: settings
+            on_line_color: root.board.line_color = self.line_color
+            on_line_width: root.board.line_width = self.line_width
+
+        Board:
+            id: board
+
+<BoardSettings>:
+    clear_button: clear_button
+    rows: 1
+    cols: 6
+
+    Button:
+        id: clear_button
+        text: "Clear"
+
+    Spinner:
+        text: "Red"
+        values: root.colors.keys()
+        on_text:
+            root.set_line_color(self.text)
+
+    Spinner:
+        text: "Normal"
+        values: root.widths.keys()
+        on_text:
+            root.set_line_width(self.text)
