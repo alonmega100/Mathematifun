@@ -19,6 +19,13 @@ class Client(object):
         self._address = address
         self._username = None
         self._user_id = None
+        self._room_id = None
+
+    def set_room_id(self, room_id):
+        self._room_id = room_id
+
+    def get_room_id(self):
+        return self._room_id
 
     def get_user_id(self):
         return self._user_id
@@ -56,17 +63,22 @@ class Client(object):
         while True:
             length = ""
             total_got = 0
-            msg = ""
+            msg = b""
+
             data = self._socket.recv(1).decode()
             while not data == "-":
                 length += data
                 data = self._socket.recv(1).decode()
             while total_got < int(length):
-                data = self._socket.recv(1).decode()
+                data = self._socket.recv(1)
                 msg += data
                 total_got += 1
-            if not msg[:2] == "00":
-                msg = str(self._user_id) + "#" + msg
+            key = msg[:2]
+            if key != b"00":
+                msg = str(self._user_id).encode() + b"#" + msg
+            if key != b"08":
+                msg = msg.decode()
+
             self._message_list.append(msg)
 
     def start(self):

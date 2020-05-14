@@ -4,6 +4,9 @@ WindowManager:
     MainScreen:
     SendMessageScreen:
     WhiteboardScreen:
+    JoinRoomScreen:
+    RoomScreen:
+
 
 # TODO: change the order
 <MainScreen>:
@@ -11,28 +14,116 @@ WindowManager:
     GridLayout:
         size: self.size
         pos: self.pos
-        row: 2
-        cols: 2
+        row: 3 # TODO: IT WAS 4 for the whiteboard screen
+        cols: 1
         Label:
             size: self.texture_size
             text: "Main Screen"
-        Button:
-            id: message_button
-            text: "Send Message"
-            on_press:
-                root.manager.transition.direction = "left"
-                app.root.current = "message"
+        GridLayout:
+            size: self.size
+            pos: self.pos
+            row: 1
+            cols: 2
+            Button:
+                id: message_button
+                text: "Send Message"
+                on_press:
+                    root.manager.transition.direction = "left"
+                    app.root.current = "message"
+            Label:
+                id: messages_label
+                size: self.texture_size
+                text: "Messages you got:"
+# TODO: DELETE IT
+        #Button:
 
-        Button:
-            id: white_board_button
-            text: "White Board"
-            on_press:
-                root.manager.transition.direction = "left"
-                app.root.current = "whiteboard"
+        #    id: white_board_button
+         #   text: "White Board"
+          #  on_press:
+           #     root.manager.transition.direction = "left"
+            #    app.root.current = "whiteboard"
+
+        GridLayout:
+                #TODO
+            size: self.size
+            pos: self.pos
+            cols: 2
+            Button:
+                id: create_room_button
+                text: "Create a room"
+                on_press:
+                    root.create_room()
+                    root.manager.transition.direction = "left"
+                    app.root.current = "room"
+
+            Button:
+                id: join_room_button
+                text: "Join room"
+                on_press:
+                    root.manager.transition.direction = "left"
+                    app.root.current = "join_room"
+
+<JoinRoomScreen>:
+    room_id_text_input: room_id_text_input
+    name: "join_room"
+    GridLayout:
+        size: self.size
+        pos: self.pos
+        rows:3
+        cols:1
         Label:
             size: self.texture_size
-            text: "Messages you got:"
+            text: "Join a Room"
+        GridLayout:
+            cols:2
+            TextInput:
+                id: room_id_text_input
+                text: "b"#"Enter the room ID"
+            Label:
+                size: self.texture_size
+                text: "press join the room"
+        GridLayout:
+            cols:2
+            Button:
+                text: "join the room"
+                on_press:
+                    root.join_room()
+                    root.manager.transition.direction = "left"
+                    app.root.current = "room"
 
+
+            Button:
+                id: join_room_button
+                text: "Back"
+                on_press:
+                    root.manager.transition.direction = "right"
+                    app.root.current = "main"
+
+
+<RoomScreen>:
+    name: "room"
+    whiteboard: whiteboard
+    chat: chat
+    Label:
+        text: "Room ID: " + app.room_id
+        pos_hint: {"top": 1}
+        size_hint: 0.3, 0.2
+    Chat:
+        id: chat
+
+        pos_hint: {"top": 0.8}
+        size_hint: 0.3, 0.6
+    Button:
+        text: "Main Menu"
+        pos: 0, 0
+        size_hint: 0.3, 0.2
+        on_press:
+            root.manager.transition.direction = "left"
+            app.root.current = "main"
+    Whiteboard:
+        id: whiteboard
+        pos: 0.3 * root.width , 0
+        size_hint: 0.7, 1
 
 
 <LoginScreen>:
@@ -40,21 +131,22 @@ WindowManager:
     password_text_input: password_text_input
 
     login_button: login_button
+    login_status_textbox: login_status_textbox
     name: "login"
 
     GridLayout:
         size: self.size
         pos: self.pos
-        row: 2
-        cols: 2
+        row: 4
+        cols: 1
         Label:
             size: self.texture_size
             text: "Login Screen"
         GridLayout:
             size: self.size
             pos: self.pos
-            row: 2
-            cols: 1
+            row: 1
+            cols: 2
             TextInput:
                 id: username_text_input
                 text: "a"#"Enter your username here"
@@ -62,18 +154,27 @@ WindowManager:
             TextInput:
                 id: password_text_input
                 text: "b"#"Enter your password here"
-        Button:
-            id: login_button
-            text: "Connect"
-            on_press:
-                root.login()
+        Label:
+            id: login_status_textbox
+            text: "Enter you username and password, then press Connect"
+        GridLayout:
+            size: self.size
+            pos: self.pos
+            row: 1
+            cols: 2
+            Button:
+                id: login_button
+                text: "Connect"
+                on_press:
+                    root.login()
 
-        Button:
-            id: signup_button
-            text: "Sing Up"
-            on_press:
-                root.manager.transition.direction = "left"
-                app.root.current = "signup"
+            Button:
+                id: signup_button
+                text: "Don't have an account? Sign Up"
+                on_press:
+                    root.manager.transition.direction = "left"
+                    app.root.current = "signup"
+
 
 <SignupScreen>:
     name: "signup"
@@ -82,53 +183,93 @@ WindowManager:
         pos: self.pos
         row: 2
         cols: 1
-        CheckBox:
-            id: is_teacher_checkbox
-        Button:
-            id: signup_button
-            text: "Sing Up"
-            on_press:
-                root.manager.transition.direction = "left"
-                app.root.current = "main"
+        Label:
+            text: "Sign Up"
+        GridLayout:
+            cols: 2
+            TextInput:
+                id: username_text_input
+                text: "Enter your username here"#"Enter your username here"
+            TextInput:
+                id: password_text_input
+                text: "Enter your password here"#"Enter your password here"
+        GridLayout:
+            cols: 2
+            Button:
+                text: "Back"
+                on_press:
+                    root.manager.transition.direction = "right"
+                    app.root.current = "login"
+            Button:
+                id: signup_button
+                text: "Sign Up"
+                on_press:
+                    root.manager.transition.direction = "left"
+                    app.root.current = "main"
+
 
 <SendMessageScreen>:
     name: "message"
     destination_user_textbox: destination_user_textbox
     message_textbox: message_textbox
+    messages_label: messages_label
 
     GridLayout:
         size: self.size
         pos: self.pos
         row: 3
-        cols: 2
+        cols: 1
         Label:
             size: self.texture_size
-            text: "Destination"
-        TextInput:
-            id: destination_user_textbox
-            text: "Type the destination's username"
-        Label:
-            size: self.texture_size
-            text: "Send Message"
-        TextInput:
-            id: message_textbox
-            text: "Type the message you want to send"
-        Button:
-            text: "Main Menu"
-            on_press:
-                root.manager.transition.direction = "right"
-                app.root.current = "main"
-        Button:
-            size: self.texture_size
-            text: "Send Message"
-            on_press:
-                root.send_message()
+            text: 'Direct Message'
+            canvas.before:
+                Color:
+                    rgb: 0.3, 0.3, 0.3
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+        GridLayout:
+            size: self.size
+            pos: self.pos
+            row: 1
+            cols: 2
+            GridLayout:
+                size: self.size
+                pos: self.pos
+                row: 2
+                cols: 1
+                TextInput:
+                    id: destination_user_textbox
+                    text: "Type the destination's username"
+                TextInput:
+                    id: message_textbox
+                    text: "Type the message you want to send"
+
+            Label:
+                id: messages_label
+                size: self.texture_size
+                text: "Messages you got:"
+
+        GridLayout:
+            size: self.size
+            pos: self.pos
+            row: 1
+            cols: 2
+            Button:
+                text: "Main Menu"
+                on_press:
+                    root.manager.transition.direction = "right"
+                    app.root.current = "main"
+            Button:
+                size: self.texture_size
+                text: "Send Message"
+                on_press:
+                    root.send_message()
 
 
 <WhiteboardScreen>:
     whiteboard: whiteboard
     name: "whiteboard"
-
     GridLayout:
         size: self.size
         pos: self.pos
@@ -145,8 +286,8 @@ WindowManager:
         Whiteboard:
             id: whiteboard
 
-<Whiteboard>:
 
+<Whiteboard>:
     settings: settings
     board: board
 
@@ -158,29 +299,46 @@ WindowManager:
 
         BoardSettings:
             id: settings
+            size_hint: 1, 0.2
             on_line_color: root.board.line_color = self.line_color
             on_line_width: root.board.line_width = self.line_width
 
         Board:
             id: board
 
+
 <BoardSettings>:
     clear_button: clear_button
     rows: 1
     cols: 6
-
     Button:
         id: clear_button
         text: "Clear"
-
     Spinner:
-        text: "Red"
+        text: "White"
         values: root.colors.keys()
         on_text:
             root.set_line_color(self.text)
-
     Spinner:
         text: "Normal"
         values: root.widths.keys()
         on_text:
             root.set_line_width(self.text)
+
+<Chat>:
+    content_text_input: content_text_input
+    ScrollView:
+        pos_hint: {"top": 1}
+        size_hint: 1, 0.8
+        Label:
+            size_hint: None, None
+            size: self.texture_size
+
+
+
+    TextInput:
+        id: content_text_input
+        pos: 0, 0
+        size_hint: 1, 0.2
+
+

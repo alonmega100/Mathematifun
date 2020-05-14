@@ -25,16 +25,23 @@ class LoginScreen(Screen):
     login_button = ObjectProperty(None)
     username_text_input = ObjectProperty(None)
     password_text_input = ObjectProperty(None)
+    login_status_textbox = ObjectProperty()
+    # TODO: ^^^^^^^^^^^^^^^^^^^
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._login_thread = None
 
     def _end_logging_in(self, _):
+
         app = App.get_running_app()
-        print(app.login_status)
-        self.manager.transition.direction = "left"
-        app.root.current = "main"
+        self.login_status_textbox.text = app.login_status
+        # TODO: ^^^^^^^^^^^^^^
+        if app.login_status == "Logged in":
+            self.manager.transition.direction = "left"
+            app.root.current = "main"
+        else:
+            self._login_thread = None
 
     def on_pre_leave(self, *args):
         super().on_pre_leave(*args)

@@ -15,6 +15,28 @@ class SendMessageScreen(Screen):
     """
     destination_user_textbox = ObjectProperty()
     message_textbox = ObjectProperty()
+    messages_label = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        app = App.get_running_app()
+        app.bind(
+            my_messages=lambda _, value: self.update_messages_label(value))
+
+    def update_messages_label(self, messages):
+        if len(messages) >= 10:
+            del messages[0]
+        final = ""
+        for message in messages:
+            author = message[:message.find("#")]
+            text = message[message.find("#") + 1:]
+            final += author + ": " + text + "\n"
+        self.messages_label.text = "Messages you got:\n" + final
+
+    def on_enter(self, *args):
+
+        pass
+
 
     def send_message(self):
         dest = self.destination_user_textbox.text
