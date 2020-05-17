@@ -51,7 +51,7 @@ class Server:
         print("added new client")
         clients.start()
         while not clients.get_update():
-            pass
+            time.sleep(0)
         clients.set_user_id(self._user_id)
         self._user_id += 1
         self._client_list.append(clients)
@@ -64,6 +64,7 @@ class Server:
         #TODO: SOURCE CAN BE FOUND IN THE FIRST PLACE OF THE TUPLE
         database = users_database.UsersDatabase("../Data/users_database.db")
         while True:
+            time.sleep(0)
             if len(self._command_queue) > 0:
                 client, data = self._command_queue.pop()
                 if isinstance(data, str):
@@ -139,7 +140,9 @@ class Server:
         :return: Nothing
         """
         while True:
+            time.sleep(0)
             for client in self._client_list:
+                time.sleep(0)
                 if client.get_update():
                     data = client.get_messages()
                     command = (client, data)
@@ -161,6 +164,7 @@ class Server:
         :return: Nothing
         """
         while True:
+            time.sleep(0)
             (client_socket, client_address) = self._server_socket.accept()
             c = (client.Client(client_socket, client_address),)
 
