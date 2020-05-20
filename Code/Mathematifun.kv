@@ -10,6 +10,7 @@ WindowManager:
 
 # TODO: change the order
 <MainScreen>:
+    messages_label: messages_label
     name: "main"
     GridLayout:
         size: self.size
@@ -118,8 +119,10 @@ WindowManager:
         pos: 0, 0
         size_hint: 0.3, 0.2
         on_press:
+            root.leave_room()
             root.manager.transition.direction = "left"
             app.root.current = "main"
+
     Whiteboard:
         id: whiteboard
         pos: 0.3 * root.width , 0
@@ -177,11 +180,15 @@ WindowManager:
 
 
 <SignupScreen>:
+    signup_button: signup_button
+    username_text_input: username_text_input
+    password_text_input: password_text_input
+    signup_status: signup_status
     name: "signup"
     GridLayout:
         size: self.size
         pos: self.pos
-        row: 2
+        row: 4
         cols: 1
         Label:
             text: "Sign Up"
@@ -193,6 +200,9 @@ WindowManager:
             TextInput:
                 id: password_text_input
                 text: "Enter your password here"#"Enter your password here"
+        Label:
+            id: signup_status
+            text: "Enter your username and password then press Sign Up"
         GridLayout:
             cols: 2
             Button:
@@ -204,8 +214,8 @@ WindowManager:
                 id: signup_button
                 text: "Sign Up"
                 on_press:
-                    root.manager.transition.direction = "left"
-                    app.root.current = "main"
+                    root.signup()
+
 
 
 <SendMessageScreen>:
@@ -344,3 +354,4 @@ WindowManager:
 <Board>:
     source: app.whiteboard_filename
     nocache: True
+    allow_stretch: True

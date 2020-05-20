@@ -25,8 +25,7 @@ class LoginScreen(Screen):
     login_button = ObjectProperty(None)
     username_text_input = ObjectProperty(None)
     password_text_input = ObjectProperty(None)
-    login_status_textbox = ObjectProperty()
-    # TODO: ^^^^^^^^^^^^^^^^^^^
+    login_status_textbox = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -36,7 +35,6 @@ class LoginScreen(Screen):
 
         app = App.get_running_app()
         self.login_status_textbox.text = app.login_status
-        # TODO: ^^^^^^^^^^^^^^
         if app.login_status == "Logged in":
             self.manager.transition.direction = "left"
             app.root.current = "main"

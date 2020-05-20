@@ -14,12 +14,12 @@ COLORS = {
 }
 DEFAULT_COLOR = "Black"
 WIDTHS = {
-    "Tiny": 1,
-    "Small": 10,
-    "Normal": 30,
-    "Big": 75,
-    "Huge": 150,
-    "Humongous": 500
+    "Tiny": 3,
+    "Small": 5,
+    "Normal": 10,
+    "Big": 35,
+    "Huge": 75,
+    "Humongous": 200
 }
 DEFAULT_WIDTH = "Normal"
 

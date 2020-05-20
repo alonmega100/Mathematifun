@@ -9,7 +9,6 @@ class Whiteboard(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-
     def start(self):
         self.settings.clear_button.bind(
-            on_press=lambda _: self.board.canvas.clear())
+            on_press=lambda _: self.board.dispatch("on_canvas_clear"))

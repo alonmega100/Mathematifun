@@ -3,7 +3,7 @@ Manages the receiving messages
 """
 import threading
 import message
-
+import time
 
 SERVER_ADDRESS = ("127.0.0.1", 4261)
 
@@ -59,20 +59,34 @@ class Client(object):
     def send_message(self, msg):
         self._socket.sendall(str(len(msg)).encode() + b"-" + msg)
 
+    def _receive_length(self):
+        length = b""
+        while True:
+            byte = self._socket.recv(1)
+            if byte == b"":
+                raise RuntimeError("socket connection broke")
+            elif byte == b"-":
+                break
+            length += byte
+        return int(length.decode())
+
+    def _receive_data(self, length):
+        bytes_count = 0
+        data = bytearray(length)
+        while bytes_count < length:
+            chunk = self._socket.recv(min(1024, length - bytes_count))
+            if chunk == b"":
+                raise RuntimeError("Socket connection broke")
+            data[bytes_count:bytes_count + len(chunk)] = chunk
+            bytes_count += len(chunk)
+        return data
+
     def receive_message(self):
         while True:
-            length = ""
-            total_got = 0
-            msg = b""
+            time.sleep(0)
+            length = self._receive_length()
+            msg = self._receive_data(length)
 
-            data = self._socket.recv(1).decode()
-            while not data == "-":
-                length += data
-                data = self._socket.recv(1).decode()
-            while total_got < int(length):
-                data = self._socket.recv(1)
-                msg += data
-                total_got += 1
             key = msg[:2]
             if key != b"00":
                 msg = str(self._user_id).encode() + b"#" + msg

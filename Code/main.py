@@ -29,6 +29,7 @@ import ui
 SERVER_ADDRESS = ("127.0.0.1", 4261)
 WHITEBOARD_FILENAME = "whiteboard.png"
 
+
 class MathematifunApp(App):
     """
     The big app
@@ -74,11 +75,11 @@ class MathematifunApp(App):
 
         self.listen_to_user_thread.start()
         print("sending info")
-        #TODO: #(str(len(msg)).encode() + b"-" + msg)
+        # TODO: #(str(len(msg)).encode() + b"-" + msg)
         msg = f"04{username}#{password}#".encode()
         self.send_message(msg)
 
-        #TODO: manage the messages correctly (add index to messages)
+        # TODO: manage the messages correctly (add index to messages)
         while True:
             time.sleep(0)
             with self.messages_lock:
@@ -86,10 +87,10 @@ class MathematifunApp(App):
                     with self._login_status_lock:
                         self._login_status = self.messages.pop()[2:]
                         break
-                    #TODO: manage all cases (wrong password etc..)
+                    # TODO: manage all cases (wrong password etc..)
 
         Clock.schedule_once(callback)
-        #TODO: put None in logging thread if it crashes or Logged out
+        # TODO: put None in logging thread if it crashes or Logged out
 
     def send_message(self, msg):
         self.connection.sendall(str(len(msg)).encode() + b"-" + msg)

@@ -90,8 +90,13 @@ class Server:
                     user_destination = data[:index_of_mark]
                     data = data[index_of_mark + 1:]
                     message = "03" + client.get_username() + "#" + data
-                    self.find_client_username_based(
-                        user_destination).send_message(message.encode())
+                    try:
+                        self.find_client_username_based(
+                            user_destination).send_message(message.encode())
+                    except Exception as e:
+                        print(e)
+                        client.send_message(
+                            ("03System# The User is not online").encode())
                 elif key == "04":  # Log in
                     index_of_mark = data.index("#")
                     username = data[:index_of_mark]
@@ -113,6 +118,7 @@ class Server:
                     room.add_user(client)
                     with self._rooms_lock:
                         self._rooms[room.room_id] = room
+                        self._rooms[room.room_id].print_users()
                     message_to_user = "05" + str(room.room_id)
                     client.send_message(message_to_user.encode())
                     client.set_room_id(room.room_id)
@@ -120,9 +126,11 @@ class Server:
                     client.set_room_id(int(data))
                     with self._rooms_lock:
                         self._rooms[int(data)].add_user(client)
+                        self._rooms[int(data)].print_users()
+
                 elif key == "07":  # Send a message to Room
                     pass  # TODO: ^^^^^^^^^^
-                elif key == b"08":
+                elif key == b"08":  # Images for whiteboard
                     room_id = client.get_room_id()
                     with self._rooms_lock:
                         print("the room id is:" + str(room_id))
@@ -132,7 +140,11 @@ class Server:
                         if user.get_username() != client.get_username():
                             user.send_message(b'08' + data)
                             print("username: " + user.get_username())
-
+                elif key == "09":  # Leave Room
+                    roomid = client.get_room_id()
+                    with self._rooms_lock:
+                        self._rooms[roomid].remove_user(client.get_username())
+                        self._rooms[roomid].print_users()
 
     def check_for_updates(self):
         """

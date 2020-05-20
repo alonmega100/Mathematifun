@@ -29,3 +29,9 @@ class Room(object):
     def remove_user(self, username):
         with self._users_lock:
             self._users.pop(username)
+
+    def print_users(self):
+        print("printing the users")
+        with self._users_lock:
+            for user in self._users.keys():
+                print(user)
