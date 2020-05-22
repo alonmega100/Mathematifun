@@ -9,7 +9,8 @@ from kivy.app import App
 from kivy.properties import (ObjectProperty,
                              ListProperty,
                              StringProperty,
-                             BooleanProperty)
+                             BooleanProperty,
+                             NumericProperty)
 from kivy.clock import Clock, mainthread
 
 
@@ -26,7 +27,6 @@ import ui
 
 # TODO ^^^^^^^^^^^^^
 
-SERVER_ADDRESS = ("127.0.0.1", 4261)
 WHITEBOARD_FILENAME = "whiteboard.png"
 
 
@@ -38,6 +38,8 @@ class MathematifunApp(App):
     my_messages = ListProperty()
     room_id = StringProperty()
     whiteboard_filename = StringProperty(WHITEBOARD_FILENAME)
+    server_ip = StringProperty()
+    server_port = NumericProperty()
 
     def __init__(self, **kwargs):
         self.register_event_type('on_whiteboard_available')
@@ -69,7 +71,7 @@ class MathematifunApp(App):
 
     def login(self, username, password, callback):
         self.connection = socket.socket()
-        self.connection.connect(SERVER_ADDRESS)
+        self.connection.connect((self.server_ip, self.server_port))
         self.listen_to_user_thread = threading.Thread(
             target=self.receive_message)
 

@@ -1,10 +1,9 @@
 """
 Imports all
 """
-
-import screen_manager
 import screen
-import board
-import board_settings
-import whiteboard
-import chat
+import ui.screen_manager
+import ui.board
+import ui.board_settings
+import ui.whiteboard
+import ui.chat

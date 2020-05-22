@@ -1,4 +1,5 @@
 WindowManager:
+    ServerFinderScreen:
     LoginScreen:
     SignupScreen:
     MainScreen:
@@ -6,7 +7,42 @@ WindowManager:
     WhiteboardScreen:
     JoinRoomScreen:
     RoomScreen:
+    
+<ServerFinderScreen>:
+    error_label: error_label
+    name: "server finder"
+    
+    GridLayout:
+        size: self.size
+        pos: self.pos
+        rows: 3
+        cols: 2
+        padding:
+            ((self.width / self.cols) * 0.25,
+            (self.height / self.rows) * 0.2)
+        spacing: (self.height / self.rows) * 0.2
 
+        Label:
+            text: "Server IP"
+
+        TextInput:
+            id: ip_text_input
+            hint_text: "IP"
+
+        Label:
+            text: "Server port"
+
+        TextInput:
+            id: port_text_input
+            hint_text: "Port"
+
+        Button:
+            text: "Login"
+            on_press:
+                root._choose_server(ip_text_input.text, port_text_input.text)
+        Label:
+            id: error_label
+            text: ""
 
 # TODO: change the order
 <MainScreen>:
