@@ -1,15 +1,24 @@
 """
-Hi
+The server of the project
 """
+
 import socket
 import threading
 import client
 import time
 import users_database
 from room import Room
+# import ssl
+import sqlite3
 
 SERVER_ADDRESS = ("127.0.0.1", 4261)
 USER_ID = 1
+
+# context = ssl.create_default_context()
+# context.check_hostname = False
+# context.verify_mode = ssl.VerifyMode.CERT_NONE
+#
+# context.load_cert_chain('./server.pem', './server.key')
 
 
 class Server:
@@ -27,20 +36,24 @@ class Server:
         self._user_id = 1
 
     def find_client_id_based(self, source):
+        """
+        Finds a client in the list using its ID
+        :param source:
+        :return:
+        """
         for clients in self._client_list:
             if str(clients.get_user_id()) == str(source):
                 return clients
 
     def find_client_username_based(self, name):
+        """
+        Find a client in the list based on its username
+        :param name:
+        :return:
+        """
         for clients in self._client_list:
             if str(clients.get_username()) == str(name):
                 return clients
-
-    def name_list_to_string(self):
-        final = ""
-        for names in self._name_list:
-            final += str(names) + " "
-        return final
 
     def manage_new_client(self, clients):
         """
@@ -61,12 +74,11 @@ class Server:
         Manages the messages the server gets from the clients
         :return:
         """
-        #TODO: SOURCE CAN BE FOUND IN THE FIRST PLACE OF THE TUPLE
         database = users_database.UsersDatabase("../Data/users_database.db")
         while True:
             time.sleep(0)
             if len(self._command_queue) > 0:
-                client, data = self._command_queue.pop()
+                client_, data = self._command_queue.pop()
                 if isinstance(data, str):
                     index_of_mark = data.index("#")
                 else:
@@ -83,20 +95,21 @@ class Server:
                 elif key == "02":  # Name list
                     data = "02"+str(self._name_list)
                     print("the data im about to send:  " + data)
-                    self.find_client_id_based(source)\
-                        .send_message(data.encode())
+                    self.find_client_id_based(source).send_message(
+                        data.encode())
                 elif key == "03":  # Messages
                     index_of_mark = data.index("#")
                     user_destination = data[:index_of_mark]
                     data = data[index_of_mark + 1:]
-                    message = "03" + client.get_username() + "#" + data
+                    message = "03" + client_.get_username() + "#" + data
                     try:
                         self.find_client_username_based(
                             user_destination).send_message(message.encode())
+                        client_.send_message(message.encode())
                     except Exception as e:
                         print(e)
-                        client.send_message(
-                            ("03System# The User is not online").encode())
+                        client_.send_message(
+                            "03System# The User is not online".encode())
                 elif key == "04":  # Log in
                     index_of_mark = data.index("#")
                     username = data[:index_of_mark]
@@ -108,43 +121,89 @@ class Server:
                     user_exists = database.get_user(username, password)
                     print("is exists: " + str(user_exists))
                     if user_exists:
-                        client.send_message(b"04Logged in")
-                        client.set_username(username)
+                        client_.send_message(b"04Logged in")
+                        client_.set_username(username)
                     else:
-                        client.send_message(
+                        client_.send_message(
                             b"04Username or password are incorrect")
                 elif key == "05":  # Add a new room
                     room = Room()
-                    room.add_user(client)
+                    room.add_user(client_)
                     with self._rooms_lock:
                         self._rooms[room.room_id] = room
                         self._rooms[room.room_id].print_users()
                     message_to_user = "05" + str(room.room_id)
-                    client.send_message(message_to_user.encode())
-                    client.set_room_id(room.room_id)
+                    client_.send_message(message_to_user.encode())
+                    client_.set_room_id(room.room_id)
                 elif key == "06":  # Add user to room
-                    client.set_room_id(int(data))
-                    with self._rooms_lock:
-                        self._rooms[int(data)].add_user(client)
-                        self._rooms[int(data)].print_users()
+                    try:
+                        client_.set_room_id(int(data))
+                        with self._rooms_lock:
+                            self._rooms[int(data)].add_user(client_)
+                    except Exception as e:
+                        print(e)
+                        room = Room()
+                        room.add_user(client_)
+                        with self._rooms_lock:
+                            self._rooms[room.room_id] = room
+                            self._rooms[room.room_id].print_users()
+                        message_to_user = "05" + str(room.room_id)
+                        client_.send_message(message_to_user.encode())
+                        client_.set_room_id(room.room_id)
 
                 elif key == "07":  # Send a message to Room
-                    pass  # TODO: ^^^^^^^^^^
+                    data = client_.get_username() + data
+                    with self._rooms_lock:
+                        self._rooms[client_.get_room_id()].add_message(data)
                 elif key == b"08":  # Images for whiteboard
-                    room_id = client.get_room_id()
+                    room_id = client_.get_room_id()
                     with self._rooms_lock:
-                        print("the room id is:" + str(room_id))
-                        users_in_room = self._rooms[room_id].get_copy_of_users()
-                        print("username: " + client.get_username())
+                        users_in_room = self._rooms[room_id].get_copy_of_users(
+
+                        )
                     for user in users_in_room:
-                        if user.get_username() != client.get_username():
+                        if user.get_username() != client_.get_username():
                             user.send_message(b'08' + data)
-                            print("username: " + user.get_username())
                 elif key == "09":  # Leave Room
-                    roomid = client.get_room_id()
+                    room_id_ = client_.get_room_id()
                     with self._rooms_lock:
-                        self._rooms[roomid].remove_user(client.get_username())
-                        self._rooms[roomid].print_users()
+                        self._rooms[room_id_].remove_user(client_.get_username(
+
+                        ))
+                        self._rooms[room_id_].print_users()
+                elif key == "10":  # Sign up request
+                    index_of_mark = data.index("#")
+                    username = data[:index_of_mark]
+                    print("this is your username:  " + username)
+
+                    password = data[index_of_mark + 1:]
+                    print("this is your password:  " + password)
+                    try:
+                        database.add_user(username, password)
+
+                    except sqlite3.IntegrityError as e:
+                        print(e)
+                        print("User already exists")
+                        client_.send_message(
+                            b"10Username already taken")
+                    else:
+                        client_.send_message(
+                            b"10Singed Up, press back and login normally")
+                        client_.set_username(username)
+                    finally:
+                        client_.close_connection()
+                        self.remove_client(client_)
+                elif key == "11":  # Close Socket and remove client
+                    client_.send_message(b"11")
+                    try:
+                        room_id_ = client_.get_room_id()
+                        with self._rooms_lock:
+                            self._rooms[room_id_].remove_user(
+                                client_.get_username())
+                    except KeyError:
+                        pass
+                    client_.close_connection()
+                    self.remove_client(client_)
 
     def check_for_updates(self):
         """
@@ -153,13 +212,12 @@ class Server:
         """
         while True:
             time.sleep(0)
-            for client in self._client_list:
+            for client_ in self._client_list:
                 time.sleep(0)
-                if client.get_update():
-                    data = client.get_messages()
-                    command = (client, data)
-                    self._command_queue.\
-                        append(command)
+                if client_.get_update():
+                    data = client_.get_messages()
+                    command = (client_, data)
+                    self._command_queue.append(command)
 
     def remove_client(self, clients):
         """
@@ -201,10 +259,9 @@ class Server:
         manage_command_queue_thread \
             = threading.Thread(target=self.manage_updates)
         manage_command_queue_thread.start()
-        users_database.UsersDatabase.create_database("../Data/users_database.db")
+        users_database.UsersDatabase.create_database(
+            "../Data/users_database.db")
         database = users_database.UsersDatabase("../Data/users_database.db")
-        #database.add_user("b", "c")
-        print(database.get_user("a", "b"))
         database.close()
 
 

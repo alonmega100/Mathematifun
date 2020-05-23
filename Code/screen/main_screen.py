@@ -27,8 +27,7 @@ class MainScreen(Screen):
         app.send_message(b"05")
 
     def update_messages_label(self, messages):
-        if len(messages) >= 10:
-            messages.pop(0)
+
         final = ""
         for message in messages:
             author = message[:message.find("#")]

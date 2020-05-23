@@ -8,6 +8,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty
 from kivy.app import App
 
+
 class SignupScreen(Screen):
     """
     The sign up screen
@@ -18,7 +19,13 @@ class SignupScreen(Screen):
     login_status_textbox = ObjectProperty()
 
     def signup(self):
-        username = self.username_text_input.text
-        password = self.password_text_input.text
+        """
+        signs you up
+        :return:
+        """
         app = App.get_running_app()
-        app.send_message(f"09{username}#{password}")
+        if app.can_signup:
+            username = self.username_text_input.text
+            password = self.password_text_input.text
+            app.can_signup = False
+            app.signup(username, password)

@@ -14,7 +14,6 @@ from kivy.properties import (ObjectProperty,
 from kivy.clock import Clock, mainthread
 
 
-import socket
 import threading
 import logging
 import time
@@ -23,20 +22,27 @@ import random
 
 import socket
 import ui
+import ssl
 
-
-# TODO ^^^^^^^^^^^^^
 
 WHITEBOARD_FILENAME = "whiteboard.png"
+# hostname = "main"
+# context = ssl.create_default_context()
+# context.check_hostname = False
+# context.verify_mode = ssl.VerifyMode.CERT_NONE
 
 
 class MathematifunApp(App):
     """
-    The big app
+    The main class of the project
     """
     listen_to_user_thread = ObjectProperty(None)
     my_messages = ListProperty()
+    room_messages = ListProperty()
     room_id = StringProperty()
+    can_signup = BooleanProperty(True)
+    signup_status = StringProperty(
+        "Enter your username and password then press Sign Up")
     whiteboard_filename = StringProperty(WHITEBOARD_FILENAME)
     server_ip = StringProperty()
     server_port = NumericProperty()
@@ -53,11 +59,19 @@ class MathematifunApp(App):
 
     @property
     def login_status(self):
+        """
+        property for the login status
+        :return:
+        """
         with self._login_status_lock:
             return self._login_status
 
     @property
     def connection(self):
+        """
+        returns the connection (socket)
+        :return:
+        """
         with self._connection_lock:
             return self._connection
 
@@ -67,21 +81,58 @@ class MathematifunApp(App):
             self._connection = value
 
     def on_whiteboard_available(self, *args):
+        """
+
+        :param args:
+        :return:
+        """
         return
 
-    def login(self, username, password, callback):
+    def on_stop(self):
+        """
+        sends a message when the client is closed, the message stops the
+        threads
+        :return:
+        """
+        try:
+            self.send_message(b"11")
+        except Exception as e:
+            print(e)
+
+    def signup(self, username, password):
+        """
+        the function that signs you up to the app
+        :param username:
+        :param password:
+        :return:
+        """
         self.connection = socket.socket()
         self.connection.connect((self.server_ip, self.server_port))
+        # self.connection = context.wrap_socket(
+        #     self.connection, server_hostname=hostname)
+        self.send_message(f"10{username}#{password}".encode())
+        threading.Thread(target=self.receive_message).start()
+
+    def login(self, username, password, callback):
+        """
+        the function that logs you into the app
+        :param username:
+        :param password:
+        :param callback:
+        :return:
+        """
+        self.connection = socket.socket()
+        self.connection.connect((self.server_ip, self.server_port))
+        # self.connection = context.wrap_socket(
+        #     self.connection, server_hostname=hostname)
+
         self.listen_to_user_thread = threading.Thread(
             target=self.receive_message)
 
         self.listen_to_user_thread.start()
         print("sending info")
-        # TODO: #(str(len(msg)).encode() + b"-" + msg)
         msg = f"04{username}#{password}#".encode()
         self.send_message(msg)
-
-        # TODO: manage the messages correctly (add index to messages)
         while True:
             time.sleep(0)
             with self.messages_lock:
@@ -89,19 +140,44 @@ class MathematifunApp(App):
                     with self._login_status_lock:
                         self._login_status = self.messages.pop()[2:]
                         break
-                    # TODO: manage all cases (wrong password etc..)
 
         Clock.schedule_once(callback)
-        # TODO: put None in logging thread if it crashes or Logged out
+
+    @mainthread
+    def update_signup_status(self, status):
+        """
+        required for the algorithm to sign you up
+        :param status:
+        :return:
+        """
+        self.connection.close()
+        self.signup_status = status.decode()
+        self.can_signup = True
+
+    def _send_raw_data(self, data):
+        total_bytes_sent = 0
+        while total_bytes_sent < len(data):
+            bytes_sent = self.connection.send(data[total_bytes_sent:])
+            if bytes_sent == 0:
+                raise RuntimeError("socket connection broken")
+            total_bytes_sent += bytes_sent
 
     def send_message(self, msg):
-        self.connection.sendall(str(len(msg)).encode() + b"-" + msg)
+        """
+        sends a message to the server. follows my protocol.
+        :param msg:
+        :return:
+        """
+        self._send_raw_data(str(len(msg)).encode() + b"-" + msg)
 
     @mainthread
     def _add_message_to_my_messages(self, msg):
         print("Added massage to my_messages:", msg)
         self.my_messages.append(msg)
-        print(self.my_messages)
+
+    @mainthread
+    def _add_message_to_room_messages(self, msg):
+        self.room_messages.append(msg)
 
     @mainthread
     def _write_to_img(self, img_data):
@@ -132,6 +208,10 @@ class MathematifunApp(App):
         return data
 
     def receive_message(self):
+        """
+        the function that receives messages. runs on a thread
+        :return:
+        """
         while True:
             time.sleep(0)
             length = self._receive_length()
@@ -143,12 +223,30 @@ class MathematifunApp(App):
                 self.room_id = msg[2:].decode()
             elif msg.startswith(b"03"):
                 self._add_message_to_my_messages(msg[2:].decode())
+            elif msg.startswith(b"07"):
+                msg = msg.decode()
+                msg = msg[2:]
+                index_sender = msg.find("#")
+                sender = msg[:index_sender]
+                msg = msg[index_sender+1:]
+                data = f"{sender}:{msg}"
+                self._add_message_to_room_messages(data)
+            elif msg.startswith(b"10"):
+                self.update_signup_status(msg[2:])
+                break
+            elif msg.startswith(b"11"):
+                self.connection.close()
+                break
             else:
                 with self.messages_lock:
                     self.messages.append(msg.decode())
 
 
 def main():
+    """
+    runs the app
+    :return:
+    """
     MathematifunApp().run()
 
 

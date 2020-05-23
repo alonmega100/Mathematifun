@@ -21,10 +21,6 @@ class RoomScreen(Screen):
     def on_enter(self, *args):
         self.whiteboard.start()
 
-    def on_touch_down(self, touch):
-        self.chat.show_keyboard()
-        return super().on_touch_down(touch)
-
     def leave_room(self):
         app = App.get_running_app()
         app.send_message(f"09".encode())

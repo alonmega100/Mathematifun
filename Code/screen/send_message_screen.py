@@ -24,19 +24,13 @@ class SendMessageScreen(Screen):
             my_messages=lambda _, value: self.update_messages_label(value))
 
     def update_messages_label(self, messages):
-        if len(messages) >= 10:
-            messages.pop(0)
+        print("update_messages_label function:", messages)
         final = ""
         for message in messages:
             author = message[:message.find("#")]
             text = message[message.find("#") + 1:]
             final += author + ": " + text + "\n"
         self.messages_label.text = "Messages you got:\n" + final
-
-    def on_enter(self, *args):
-
-        pass
-
 
     def send_message(self):
         dest = self.destination_user_textbox.text

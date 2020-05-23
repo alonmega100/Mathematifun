@@ -23,18 +23,16 @@ WindowManager:
         spacing: (self.height / self.rows) * 0.2
 
         Label:
-            text: "Server IP"
-
+            text: "Server IP:"
         TextInput:
             id: ip_text_input
-            hint_text: "IP"
-
+            text: "127.0.0.1"
         Label:
-            text: "Server port"
-
+            text: "Server port:"
         TextInput:
             id: port_text_input
-            hint_text: "Port"
+            #hint_text: "Port"
+            text: "4261"
 
         Button:
             text: "Login"
@@ -67,18 +65,13 @@ WindowManager:
                 on_press:
                     root.manager.transition.direction = "left"
                     app.root.current = "message"
-            Label:
-                id: messages_label
-                size: self.texture_size
-                text: "Messages you got:"
-# TODO: DELETE IT
-        #Button:
-
-        #    id: white_board_button
-         #   text: "White Board"
-          #  on_press:
-           #     root.manager.transition.direction = "left"
-            #    app.root.current = "whiteboard"
+            ScrollView:
+                do_scroll_y: True
+                Label:
+                    id: messages_label
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    text: "Messages you got:"
 
         GridLayout:
                 #TODO
@@ -115,7 +108,7 @@ WindowManager:
             cols:2
             TextInput:
                 id: room_id_text_input
-                text: "b"#"Enter the room ID"
+                hint_text: "Enter the room ID"
             Label:
                 size: self.texture_size
                 text: "press join the room"
@@ -188,11 +181,10 @@ WindowManager:
             cols: 2
             TextInput:
                 id: username_text_input
-                text: "a"#"Enter your username here"
-                #TODO: CHANGE THE TEXT
+                hint_text: "Enter your username here"
             TextInput:
                 id: password_text_input
-                text: "b"#"Enter your password here"
+                hint_text: "Enter your password here"
         Label:
             id: login_status_textbox
             text: "Enter you username and password, then press Connect"
@@ -232,13 +224,14 @@ WindowManager:
             cols: 2
             TextInput:
                 id: username_text_input
-                text: "Enter your username here"#"Enter your username here"
+                hint_text: "Enter your username here"
             TextInput:
                 id: password_text_input
-                text: "Enter your password here"#"Enter your password here"
+                hint_text: "Enter your password here"
         Label:
             id: signup_status
-            text: "Enter your username and password then press Sign Up"
+            text: app.signup_status
+
         GridLayout:
             cols: 2
             Button:
@@ -286,15 +279,18 @@ WindowManager:
                 cols: 1
                 TextInput:
                     id: destination_user_textbox
-                    text: "Type the destination's username"
+                    hint_text: "Type the destination's username"
                 TextInput:
                     id: message_textbox
-                    text: "Type the message you want to send"
+                    hint_text: "Type the message you want to send"
+            ScrollView:
+                do_scroll_y: True
+                Label:
+                    id: messages_label
+                    size_hint_y: None
+                    height: self.texture_size[1]
 
-            Label:
-                id: messages_label
-                size: self.texture_size
-                text: "Messages you got:"
+                    text: "Messages you got:"
 
         GridLayout:
             size: self.size
@@ -374,18 +370,22 @@ WindowManager:
 <Chat>:
     content_text_input: content_text_input
     ScrollView:
+        do_scroll_y: True
         pos_hint: {"top": 1}
         size_hint: 1, 0.8
         Label:
             size_hint: None, None
             size: self.texture_size
-
-
+            text: "\n".join(app.room_messages)
 
     TextInput:
         id: content_text_input
         pos: 0, 0
         size_hint: 1, 0.2
+        multiline: False
+        on_text_validate:
+            root.send_message()
+            self.text = ""
 
 <Board>:
     source: app.whiteboard_filename

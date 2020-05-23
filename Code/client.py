@@ -1,8 +1,8 @@
 """
-Manages the receiving messages
+The client object
 """
+
 import threading
-import message
 import time
 
 SERVER_ADDRESS = ("127.0.0.1", 4261)
@@ -22,21 +22,48 @@ class Client(object):
         self._room_id = None
 
     def set_room_id(self, room_id):
+        """
+        sets the room id for the client
+        :param room_id:
+        :return:
+        """
         self._room_id = room_id
 
     def get_room_id(self):
+        """
+        returns the room id that the client is in right now
+        :return:
+        """
         return self._room_id
 
     def get_user_id(self):
+        """
+        returns the user id
+        :return:
+        """
         return self._user_id
 
     def set_user_id(self, user_id):
+        """
+        sets the users id
+        :param user_id:
+        :return:
+        """
         self._user_id = user_id
 
     def get_username(self):
+        """
+        returns the username of that client
+        :return:
+        """
         return self._username
 
     def set_username(self, username):
+        """
+        sets the username of this client
+        :param username:
+        :return:
+        """
         self._username = username
 
     def get_messages(self):
@@ -47,6 +74,10 @@ class Client(object):
         return self._message_list.pop()
 
     def close_connection(self):
+        """
+        closes the socket
+        :return:
+        """
         self._socket.close()
 
     def get_update(self):
@@ -56,8 +87,21 @@ class Client(object):
         """
         return len(self._message_list) > 0
 
+    def _send_raw_data(self, data):
+        total_bytes_sent = 0
+        while total_bytes_sent < len(data):
+            bytes_sent = self._socket.send(data[total_bytes_sent:])
+            if bytes_sent == 0:
+                raise RuntimeError("socket connection broken")
+            total_bytes_sent += bytes_sent
+
     def send_message(self, msg):
-        self._socket.sendall(str(len(msg)).encode() + b"-" + msg)
+        """
+        sends a message to the user, follows my protocol
+        :param msg:
+        :return:
+        """
+        self._send_raw_data(str(len(msg)).encode() + b"-" + msg)
 
     def _receive_length(self):
         length = b""
@@ -82,6 +126,10 @@ class Client(object):
         return data
 
     def receive_message(self):
+        """
+        receives messages runs on a thread
+        :return:
+        """
         while True:
             time.sleep(0)
             length = self._receive_length()
@@ -92,8 +140,9 @@ class Client(object):
                 msg = str(self._user_id).encode() + b"#" + msg
             if key != b"08":
                 msg = msg.decode()
-
             self._message_list.append(msg)
+            if key == b"10" or key == b"11":
+                break
 
     def start(self):
         """
