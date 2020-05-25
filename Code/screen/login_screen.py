@@ -9,7 +9,7 @@ from kivy.properties import ObjectProperty
 from kivy.app import App
 from kivy.clock import Clock
 
-from main import MathematifunApp
+from main import StudyTogetherApp
 import socket
 import threading
 import logging

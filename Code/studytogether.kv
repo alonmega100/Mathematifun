@@ -42,18 +42,22 @@ WindowManager:
             id: error_label
             text: ""
 
-# TODO: change the order
 <MainScreen>:
     messages_label: messages_label
     name: "main"
     GridLayout:
         size: self.size
         pos: self.pos
-        row: 3 # TODO: IT WAS 4 for the whiteboard screen
+        row: 3
         cols: 1
-        Label:
-            size: self.texture_size
-            text: "Main Screen"
+        GridLayout:
+            cols: 2
+            Image:
+                source: "icon.ico"
+            Label:
+                background_color: (1, 1, 1, 1)
+                size: self.texture_size
+                text: "Main Screen"
         GridLayout:
             size: self.size
             pos: self.pos

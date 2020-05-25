@@ -13,7 +13,6 @@ from kivy.properties import (ObjectProperty,
                              NumericProperty)
 from kivy.clock import Clock, mainthread
 
-
 import threading
 import logging
 import time
@@ -32,7 +31,7 @@ WHITEBOARD_FILENAME = "whiteboard.png"
 # context.verify_mode = ssl.VerifyMode.CERT_NONE
 
 
-class MathematifunApp(App):
+class StudyTogetherApp(App):
     """
     The main class of the project
     """
@@ -229,7 +228,7 @@ class MathematifunApp(App):
                 index_sender = msg.find("#")
                 sender = msg[:index_sender]
                 msg = msg[index_sender+1:]
-                data = f"{sender}:{msg}"
+                data = f" {sender}: {msg}"
                 self._add_message_to_room_messages(data)
             elif msg.startswith(b"10"):
                 self.update_signup_status(msg[2:])
@@ -247,7 +246,7 @@ def main():
     runs the app
     :return:
     """
-    MathematifunApp().run()
+    StudyTogetherApp().run()
 
 
 if __name__ == '__main__':

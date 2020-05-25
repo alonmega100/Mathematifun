@@ -11,7 +11,7 @@ from room import Room
 # import ssl
 import sqlite3
 
-SERVER_ADDRESS = ("127.0.0.1", 4261)
+SERVER_ADDRESS = ("0.0.0.0", 4261)
 USER_ID = 1
 
 # context = ssl.create_default_context()
@@ -103,9 +103,11 @@ class Server:
                     data = data[index_of_mark + 1:]
                     message = "03" + client_.get_username() + "#" + data
                     try:
+                        print("MESSAGE IM ABOUT TO SEND: " + message)
                         self.find_client_username_based(
                             user_destination).send_message(message.encode())
-                        client_.send_message(message.encode())
+                        if user_destination != client_.get_username():
+                            client_.send_message(message.encode())
                     except Exception as e:
                         print(e)
                         client_.send_message(
